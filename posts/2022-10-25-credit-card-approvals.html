@@ -1,0 +1,2635 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.251">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="I Made Nusa Yudiskara">
+<meta name="dcterms.date" content="2022-10-25">
+<meta name="description" content="Artikel ini membahas tentang kasus klasifikasi persetujuan permohonan aplikasi kartu kredit dan membangun model machine learning yang sesuai dengan kasus tersebut.">
+
+<title>I Made Nusa Yudiskara - Klasifikasi Persetujuan Permohonan Aplikasi Kartu Kredit</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">I Made Nusa Yudiskara</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html">About</a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/nusa1890"><i class="bi bi-github" role="img">
+</i> 
+ </a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/NusaYudiskara"><i class="bi bi-twitter" role="img">
+</i> 
+ </a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Klasifikasi Persetujuan Permohonan Aplikasi Kartu Kredit</h1>
+                  <div>
+        <div class="description">
+          Artikel ini membahas tentang kasus klasifikasi persetujuan permohonan aplikasi kartu kredit dan membangun model machine learning yang sesuai dengan kasus tersebut.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">jupyter</div>
+                <div class="quarto-category">code</div>
+                <div class="quarto-category">analysis</div>
+                <div class="quarto-category">classification</div>
+                <div class="quarto-category">logistic regression</div>
+                <div class="quarto-category">data cleaning</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>I Made Nusa Yudiskara </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">October 25, 2022</p>
+      </div>
+    </div>
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="permohonan-aplikasi-kartu-kredit" class="level2">
+<h2 class="anchored" data-anchor-id="permohonan-aplikasi-kartu-kredit">1. Permohonan aplikasi kartu kredit</h2>
+<p>Bank komersial mendapatkan banyak form aplikasi untuk membuat kartu kredit. Permintaan kartu kredit ditolak dengan berbagai alasan, contohnya, jumlah hutang yang tinggi, pendapatan rendah, atau masalah lain pada laporan kredit. Memeriksa semua form aplikasi secara manual menghabiskan banyak waktu, dan manusia cenderung membuat kesalahan. Pada artikel ini saya akan mencoba membuat model machine learning untuk memprediksi kelayakan aplikasi kartu kedit secara otomatis</p>
+<p>
+</p><p>Berikut merupakan dataset <a href="http://archive.ics.uci.edu/ml/datasets/credit+approval">“Credit Card Approval”</a> dari UCI Machine Learning Repository.</p>
+<div class="cell" data-dc="{&quot;key&quot;:&quot;3&quot;}" data-tags="[&quot;sample_code&quot;]" data-execution_count="40">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Import pandas</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Load dataset</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>cc_apps <span class="op">=</span> pd.read_csv(<span class="st">"datasets/cc_approvals.data"</span>, header<span class="op">=</span><span class="va">None</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>cc_apps.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="aplikasi-kartu-kredit" class="level2">
+<h2 class="anchored" data-anchor-id="aplikasi-kartu-kredit">2. Aplikasi kartu kredit</h2>
+<p>Semua fitur pada dataset ini tidak diperlihatkan untuk menjaga privasi, namun <a href="http://rstudio-pubs-static.s3.amazonaws.com/73039_9946de135c0a49daa7a0a9eda4a67a72.html">blog ini</a> memberikan penjelasan yang cukup baik mengenai fitur-fitur yang mungkin dapat digunakan. Fitur-fitur yang biasa dadapati pada aplikasi kartu kredit adalah <code>Gender</code>, <code>Age</code>, <code>Debt</code>, <code>Married</code>, <code>BankCustomer</code>, <code>EducationLevel</code>, <code>Ethnicity</code>, <code>YearsEmployed</code>, <code>PriorDefault</code>, <code>Employed</code>, <code>CreditScore</code>, <code>DriversLicense</code>, <code>Citizen</code>, <code>ZipCode</code>, <code>Income</code> dan <code>ApprovalStatus</code>. Saat ini dataset ini hanya kumpulan fitur numerik dan non-numerikal, Masalah ini dapat diperbaiki dengan preprocessing, namun sebelum melakukan preprocessing, sebaiknya kita harus memeriksa semua masalah yang mungkin ada pada dataset ini yang perlu diperbaiki.</p>
+<div class="cell" data-dc="{&quot;key&quot;:&quot;10&quot;}" data-tags="[&quot;sample_code&quot;]" data-execution_count="42">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Print summary statistics</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>cc_apps_description <span class="op">=</span> cc_apps.describe()</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cc_apps_description)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'</span><span class="ch">\n</span><span class="st">'</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Print DataFrame information</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>cc_apps_info <span class="op">=</span> cc_apps.info()</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cc_apps_info)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'</span><span class="ch">\n</span><span class="st">'</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cc_apps.tail(<span class="dv">17</span>))</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Inspect missing values in the dataset</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co"># ... YOUR CODE FOR </span><span class="al">TASK</span><span class="co"> 2 ...</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               2           7          10             14
+count  690.000000  690.000000  690.00000     690.000000
+mean     4.758725    2.223406    2.40000    1017.385507
+std      4.978163    3.346513    4.86294    5210.102598
+min      0.000000    0.000000    0.00000       0.000000
+25%      1.000000    0.165000    0.00000       0.000000
+50%      2.750000    1.000000    0.00000       5.000000
+75%      7.207500    2.625000    3.00000     395.500000
+max     28.000000   28.500000   67.00000  100000.000000
+
+
+&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 690 entries, 0 to 689
+Data columns (total 16 columns):
+0     690 non-null object
+1     690 non-null object
+2     690 non-null float64
+3     690 non-null object
+4     690 non-null object
+5     690 non-null object
+6     690 non-null object
+7     690 non-null float64
+8     690 non-null object
+9     690 non-null object
+10    690 non-null int64
+11    690 non-null object
+12    690 non-null object
+13    690 non-null object
+14    690 non-null int64
+15    690 non-null object
+dtypes: float64(2), int64(2), object(12)
+memory usage: 86.3+ KB
+None
+
+
+    0      1       2  3  4   5   6      7  8  9   10 11 12     13   14 15
+673  ?  29.50   2.000  y  p   e   h  2.000  f  f   0  f  g  00256   17  -
+674  a  37.33   2.500  u  g   i   h  0.210  f  f   0  f  g  00260  246  -
+675  a  41.58   1.040  u  g  aa   v  0.665  f  f   0  f  g  00240  237  -
+676  a  30.58  10.665  u  g   q   h  0.085  f  t  12  t  g  00129    3  -
+677  b  19.42   7.250  u  g   m   v  0.040  f  t   1  f  g  00100    1  -
+678  a  17.92  10.210  u  g  ff  ff  0.000  f  f   0  f  g  00000   50  -
+679  a  20.08   1.250  u  g   c   v  0.000  f  f   0  f  g  00000    0  -
+680  b  19.50   0.290  u  g   k   v  0.290  f  f   0  f  g  00280  364  -
+681  b  27.83   1.000  y  p   d   h  3.000  f  f   0  f  g  00176  537  -
+682  b  17.08   3.290  u  g   i   v  0.335  f  f   0  t  g  00140    2  -
+683  b  36.42   0.750  y  p   d   v  0.585  f  f   0  f  g  00240    3  -
+684  b  40.58   3.290  u  g   m   v  3.500  f  f   0  t  s  00400    0  -
+685  b  21.08  10.085  y  p   e   h  1.250  f  f   0  f  g  00260    0  -
+686  a  22.67   0.750  u  g   c   v  2.000  f  t   2  t  g  00200  394  -
+687  a  25.25  13.500  y  p  ff  ff  2.000  f  t   1  t  g  00200    1  -
+688  b  17.92   0.205  u  g  aa   v  0.040  f  f   0  f  g  00280  750  -
+689  b  35.00   3.375  u  g   c   h  8.290  f  f   0  t  g  00000    0  -</code></pre>
+</div>
+</div>
+</section>
+<section id="membagi-data-menjadi-train-dan-test-set" class="level2">
+<h2 class="anchored" data-anchor-id="membagi-data-menjadi-train-dan-test-set">3. Membagi data menjadi train dan test set</h2>
+<p>Sekarang, saya akan membagi data menjadi 2 set yaitu train set dan test set. Untuk mempersiapkan data untuk dua tahapan lain dari proses machine learning yaitu training dan testing. Sebaiknya, tidak ada informasi pada test set yang digunakan untuk membantu proses preprocessing pada train set. maka dari itu pertama saya akan membagi data terlebih dahulu kemudian membaginya. Selain itu fitur-fitur seperti <code>DriversLicense</code> dan <code>ZipCode</code> tidak terlalu penting untuk digunakan pada proses training dibandingkan dengan fitur-fitur yang lain untuk memprediksi kelayakan aplikasi kartu kredit</p>
+<div class="cell" data-dc="{&quot;key&quot;:&quot;17&quot;}" data-tags="[&quot;sample_code&quot;]" data-execution_count="44">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Import train_test_split</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop fitur 11 dan 13</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>cc_apps <span class="op">=</span> cc_apps.drop([<span class="dv">11</span>,<span class="dv">13</span>], axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Split data menjadi train dan test set</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>cc_apps_train, cc_apps_test <span class="op">=</span> train_test_split(cc_apps, test_size<span class="op">=</span><span class="fl">0.33</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="mengatasi-missing-values-part-i" class="level2">
+<h2 class="anchored" data-anchor-id="mengatasi-missing-values-part-i">4. Mengatasi missing values (part i)</h2>
+Setelah data dibagi menjadi train dan test set. kita bisa mulai mengatasi masalah yang kita temui ketika memeriksa dataframe:
+<ul>
+<li>
+Dataset yang digunakan saat ini memiliki data numerik dan non-numerik(<code>float64</code>, <code>int64</code> dan <code>object</code>)
+</li>
+<li>
+Dataset ini juga memiliki berbagai rentang nilai. Ada fitur memiliki rentang nilai 0-28, ada juga yang memiliki rentang 2-67, bahkan 1017-100000.
+</li>
+<li>
+Yang terakhir pada dataset beberapa baris pada setiap kolom tidak memiliki nilai (missing values). Missing values pada dataset ditandai dengan simbol ?
+</li>
+</ul>
+<div class="cell" data-dc="{&quot;key&quot;:&quot;24&quot;}" data-tags="[&quot;sample_code&quot;]" data-execution_count="46">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Import numpy</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Mengganti simbol ? dengan NaN pada train dan test set </span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>cc_apps_train <span class="op">=</span> cc_apps_train.replace(<span class="st">'?'</span>,np.NaN)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>cc_apps_test <span class="op">=</span> cc_apps_test.replace(<span class="st">'?'</span>,np.NaN)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="mengatasi-missing-values-part-ii" class="level2">
+<h2 class="anchored" data-anchor-id="mengatasi-missing-values-part-ii">5. Mengatasi missing values (part ii)</h2>
+<p>Semua ? sudah diganti dengan NaN. Ini bertujuan untuk membantu kita untuk pada tahapan selanjutnya untuk mengatasi missing value, yaitu dengan strategi mean imputation</p>
+<div class="cell" data-dc="{&quot;key&quot;:&quot;31&quot;}" data-tags="[&quot;sample_code&quot;]" data-execution_count="48">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Imputasi missing values dengan mean imputation</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>cc_apps_train.fillna(cc_apps_train.mean(), inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>cc_apps_test.fillna(cc_apps_test.mean(), inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Tampilkan jumlah nilai NaN pada dataset untuk memverifikasi</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cc_apps_train.isnull().<span class="bu">sum</span>())</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cc_apps_test.isnull().<span class="bu">sum</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="mengatasi-missing-values-part-iii" class="level2">
+<h2 class="anchored" data-anchor-id="mengatasi-missing-values-part-iii">6. Mengatasi missing values (part iii)</h2>
+<p>Kita telah berhasi mengatasi missing values yang ada pada kolom yang memiliki nilai numerikas. namun masih banyak missing values yang perlu di imputasi pada kolom 0, 1, 3, 4, 5, 6, dan 13. Semua kolom ini memiliki nilai non-numerik, maka dari itu strategi mean imputation tidak akan berhasil jika digunakan pada kolom tersebut. Imputasi pada kolom-kolom ini akan dilakukan dengan menggunakan nilai yang sering muncul pada kolom tersebut. Metode ini secara umum baik digunakan ketika melakukan imputasi untuk data kategorikal.</p>
+<div class="cell" data-dc="{&quot;key&quot;:&quot;38&quot;}" data-tags="[&quot;sample_code&quot;]" data-execution_count="50">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Iterasi untuk setiap kolom pada cc_apps_train </span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> col <span class="kw">in</span> cc_apps_train.columns:</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Jika tipe data kolom tersebut object</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> cc_apps_train[col].dtypes <span class="op">==</span> <span class="st">'object'</span>:</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Imputasi dengan nilai yang paling sering muncul</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        cc_apps_train <span class="op">=</span> cc_apps_train.fillna(cc_apps_train[col].value_counts().index[<span class="dv">0</span>])</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        cc_apps_test <span class="op">=</span> cc_apps_test.fillna(cc_apps_train[col].value_counts().index[<span class="dv">0</span>])</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Hitung jumlah nilai NaN yang ada pada dataset </span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cc_apps_train.isnull().<span class="bu">sum</span>())</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cc_apps_test.isnull().<span class="bu">sum</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>0     0
+1     0
+2     0
+3     0
+4     0
+5     0
+6     0
+7     0
+8     0
+9     0
+10    0
+12    0
+14    0
+15    0
+dtype: int64
+0     0
+1     0
+2     0
+3     0
+4     0
+5     0
+6     0
+7     0
+8     0
+9     0
+10    0
+12    0
+14    0
+15    0
+dtype: int64</code></pre>
+</div>
+</div>
+</section>
+<section id="data-preprocessing-part-i" class="level2">
+<h2 class="anchored" data-anchor-id="data-preprocessing-part-i">7. Data preprocessing (part i)</h2>
+Semua missing values telah berhasil diatasi. Masih ada beberapa langkah data preprocessing yang diperlukan sebelum mulai membangun model machine learning. Saya akan membagi tahapan preprocessing ini menjadi dua tahapan:
+<ol>
+<li>
+Ubah data non-numerik menjadi numerik.
+</li>
+<li>
+Manipulasi data sehingga semua nilai fitur memiliki rentang nilai yang sama
+</li>
+</ol>
+<p>Pertama, saya akan mengubah semua nilai non-numerik menjadi numerik. Hal ini penting dilakukan untuk mendapatkan proses komputasi yang lebih cepat, selain itu banyak model machine learning (terutama yang ada pada library scikit-learn) mengharuskan data dengan format numerik. Hal ini akan dilakukan dengan menggunakan method <code>get_dummies()</code> dari library pandas.</p>
+<div class="cell" data-dc="{&quot;key&quot;:&quot;45&quot;}" data-execution_count="52">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>pd.get_dummies(cc_apps_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="52">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>2</th>
+      <th>7</th>
+      <th>10</th>
+      <th>14</th>
+      <th>0_a</th>
+      <th>0_b</th>
+      <th>1_13.75</th>
+      <th>1_15.83</th>
+      <th>1_15.92</th>
+      <th>1_16.00</th>
+      <th>...</th>
+      <th>6_z</th>
+      <th>8_f</th>
+      <th>8_t</th>
+      <th>9_f</th>
+      <th>9_t</th>
+      <th>12_g</th>
+      <th>12_p</th>
+      <th>12_s</th>
+      <th>15_+</th>
+      <th>15_-</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>382</th>
+      <td>2.500</td>
+      <td>4.500</td>
+      <td>0</td>
+      <td>456</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>137</th>
+      <td>2.750</td>
+      <td>4.250</td>
+      <td>6</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>346</th>
+      <td>1.500</td>
+      <td>0.250</td>
+      <td>0</td>
+      <td>122</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>326</th>
+      <td>1.085</td>
+      <td>0.040</td>
+      <td>0</td>
+      <td>179</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>33</th>
+      <td>5.125</td>
+      <td>5.000</td>
+      <td>0</td>
+      <td>4000</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>426</th>
+      <td>2.040</td>
+      <td>0.250</td>
+      <td>0</td>
+      <td>50</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>477</th>
+      <td>2.500</td>
+      <td>10.000</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>4.915</td>
+      <td>3.165</td>
+      <td>0</td>
+      <td>1442</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>22</th>
+      <td>8.000</td>
+      <td>7.875</td>
+      <td>6</td>
+      <td>1260</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>300</th>
+      <td>2.000</td>
+      <td>6.500</td>
+      <td>1</td>
+      <td>10</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>221</th>
+      <td>11.000</td>
+      <td>20.000</td>
+      <td>7</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>398</th>
+      <td>12.500</td>
+      <td>1.250</td>
+      <td>0</td>
+      <td>17</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>675</th>
+      <td>1.040</td>
+      <td>0.665</td>
+      <td>0</td>
+      <td>237</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>550</th>
+      <td>22.290</td>
+      <td>12.750</td>
+      <td>1</td>
+      <td>109</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>84</th>
+      <td>0.625</td>
+      <td>0.455</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>331</th>
+      <td>2.500</td>
+      <td>2.500</td>
+      <td>0</td>
+      <td>2</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>332</th>
+      <td>2.500</td>
+      <td>1.000</td>
+      <td>0</td>
+      <td>16</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>578</th>
+      <td>1.625</td>
+      <td>1.500</td>
+      <td>10</td>
+      <td>4700</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>259</th>
+      <td>1.750</td>
+      <td>0.165</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>203</th>
+      <td>10.250</td>
+      <td>0.710</td>
+      <td>2</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>196</th>
+      <td>3.165</td>
+      <td>3.165</td>
+      <td>3</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>651</th>
+      <td>7.625</td>
+      <td>0.125</td>
+      <td>1</td>
+      <td>160</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>513</th>
+      <td>9.960</td>
+      <td>0.000</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>393</th>
+      <td>0.540</td>
+      <td>1.000</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>93</th>
+      <td>1.375</td>
+      <td>9.460</td>
+      <td>0</td>
+      <td>100</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>623</th>
+      <td>0.000</td>
+      <td>0.665</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>291</th>
+      <td>10.000</td>
+      <td>1.000</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>299</th>
+      <td>12.125</td>
+      <td>3.335</td>
+      <td>2</td>
+      <td>173</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>369</th>
+      <td>0.750</td>
+      <td>0.750</td>
+      <td>0</td>
+      <td>2</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>184</th>
+      <td>5.665</td>
+      <td>2.585</td>
+      <td>7</td>
+      <td>3257</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>252</th>
+      <td>11.000</td>
+      <td>1.000</td>
+      <td>11</td>
+      <td>3000</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>21</th>
+      <td>1.000</td>
+      <td>0.835</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>313</th>
+      <td>10.000</td>
+      <td>0.415</td>
+      <td>0</td>
+      <td>42</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>459</th>
+      <td>0.290</td>
+      <td>1.500</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>160</th>
+      <td>2.000</td>
+      <td>1.000</td>
+      <td>4</td>
+      <td>7544</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>276</th>
+      <td>5.415</td>
+      <td>0.290</td>
+      <td>0</td>
+      <td>484</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>191</th>
+      <td>0.205</td>
+      <td>5.125</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>385</th>
+      <td>5.500</td>
+      <td>1.500</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>413</th>
+      <td>1.500</td>
+      <td>0.000</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>491</th>
+      <td>0.875</td>
+      <td>4.625</td>
+      <td>2</td>
+      <td>2000</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>343</th>
+      <td>2.750</td>
+      <td>0.000</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>308</th>
+      <td>1.290</td>
+      <td>0.250</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>661</th>
+      <td>3.500</td>
+      <td>0.165</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>130</th>
+      <td>5.500</td>
+      <td>13.000</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>663</th>
+      <td>4.000</td>
+      <td>1.500</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>99</th>
+      <td>1.000</td>
+      <td>1.000</td>
+      <td>2</td>
+      <td>500</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>372</th>
+      <td>4.585</td>
+      <td>1.000</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>87</th>
+      <td>2.210</td>
+      <td>4.000</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>458</th>
+      <td>5.500</td>
+      <td>5.000</td>
+      <td>0</td>
+      <td>687</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>330</th>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>214</th>
+      <td>2.710</td>
+      <td>5.250</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>466</th>
+      <td>3.085</td>
+      <td>2.500</td>
+      <td>2</td>
+      <td>41</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>121</th>
+      <td>12.500</td>
+      <td>1.210</td>
+      <td>67</td>
+      <td>258</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>614</th>
+      <td>4.415</td>
+      <td>0.125</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>11.250</td>
+      <td>2.500</td>
+      <td>17</td>
+      <td>1208</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>71</th>
+      <td>4.000</td>
+      <td>12.500</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>106</th>
+      <td>1.165</td>
+      <td>0.500</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>270</th>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>435</th>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>4</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>102</th>
+      <td>5.000</td>
+      <td>0.375</td>
+      <td>2</td>
+      <td>38</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+<p>462 rows × 334 columns</p>
+</div>
+</div>
+</div>
+<div class="cell" data-dc="{&quot;key&quot;:&quot;45&quot;}" data-tags="[&quot;sample_code&quot;]" data-execution_count="53">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Ubah fitur pada train dan test set secara terpisah</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>cc_apps_train <span class="op">=</span> pd.get_dummies(cc_apps_train)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>cc_apps_test <span class="op">=</span> pd.get_dummies(cc_apps_test)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Reindex kolom-kolom yang ada pada test set agar sejajar dengan train set</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>cc_apps_test <span class="op">=</span> cc_apps_test.reindex(columns<span class="op">=</span>cc_apps_train.columns, fill_value<span class="op">=</span><span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-dc="{&quot;key&quot;:&quot;45&quot;}" data-execution_count="54">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>cc_apps_train.iloc[:, :<span class="op">-</span><span class="dv">1</span>].values, cc_apps_train.iloc[:, [<span class="op">-</span><span class="dv">1</span>]].values</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="54">
+<pre><code>(array([[2.5  , 4.5  , 0.   , ..., 0.   , 0.   , 0.   ],
+        [2.75 , 4.25 , 6.   , ..., 0.   , 0.   , 1.   ],
+        [1.5  , 0.25 , 0.   , ..., 0.   , 0.   , 0.   ],
+        ...,
+        [0.   , 0.   , 0.   , ..., 1.   , 0.   , 1.   ],
+        [0.   , 0.   , 4.   , ..., 0.   , 0.   , 0.   ],
+        [5.   , 0.375, 2.   , ..., 0.   , 0.   , 0.   ]]),
+ array([[1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [0],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [1],
+        [0],
+        [1],
+        [0],
+        [0],
+        [1],
+        [0],
+        [1],
+        [1],
+        [1],
+        [1],
+        [1],
+        [1],
+        [0],
+        [0],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [0],
+        [0],
+        [1],
+        [0],
+        [0],
+        [0],
+        [1],
+        [0],
+        [0],
+        [1],
+        [0],
+        [1],
+        [1],
+        [1],
+        [0],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [0],
+        [1],
+        [0],
+        [1],
+        [0],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [0],
+        [1],
+        [1],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [0],
+        [1],
+        [0],
+        [0],
+        [1],
+        [1],
+        [1],
+        [1],
+        [1],
+        [0],
+        [0],
+        [1],
+        [0],
+        [0],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [0],
+        [0],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [1],
+        [0],
+        [0],
+        [1],
+        [1],
+        [1],
+        [1],
+        [0],
+        [1],
+        [0],
+        [1],
+        [0],
+        [1],
+        [0],
+        [1],
+        [0],
+        [1],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [1],
+        [0],
+        [0],
+        [0],
+        [0],
+        [0],
+        [0],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [1],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [0],
+        [0],
+        [0],
+        [0],
+        [1],
+        [1],
+        [1],
+        [0],
+        [0],
+        [0],
+        [0],
+        [0],
+        [0],
+        [0],
+        [1],
+        [1],
+        [1],
+        [1],
+        [0],
+        [0],
+        [0],
+        [1],
+        [0],
+        [1],
+        [0],
+        [1],
+        [0],
+        [1],
+        [1],
+        [1],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [0],
+        [1],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [1],
+        [1],
+        [0],
+        [0],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [0],
+        [1],
+        [0],
+        [0],
+        [0],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [0],
+        [1],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [1],
+        [0],
+        [0],
+        [1],
+        [1],
+        [1],
+        [0],
+        [0],
+        [0],
+        [1],
+        [0],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [1],
+        [1],
+        [1],
+        [1],
+        [1],
+        [0],
+        [0],
+        [0],
+        [1],
+        [0],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [1],
+        [1],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [0],
+        [0],
+        [1],
+        [0],
+        [1],
+        [0],
+        [1],
+        [1],
+        [1],
+        [1],
+        [1],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [0],
+        [0],
+        [1],
+        [0],
+        [1],
+        [0],
+        [0],
+        [0],
+        [1],
+        [1],
+        [0],
+        [0],
+        [1],
+        [0],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [0],
+        [0],
+        [1],
+        [1],
+        [1],
+        [0],
+        [1],
+        [0],
+        [0],
+        [0],
+        [0],
+        [0],
+        [0],
+        [1],
+        [0],
+        [1],
+        [1],
+        [1],
+        [1],
+        [1],
+        [0],
+        [0],
+        [0],
+        [0],
+        [1],
+        [0],
+        [1],
+        [0],
+        [0],
+        [0],
+        [0],
+        [0],
+        [0],
+        [1],
+        [0],
+        [0],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [1],
+        [0],
+        [0],
+        [0],
+        [0],
+        [1],
+        [1],
+        [1],
+        [0],
+        [1],
+        [0],
+        [1],
+        [0],
+        [1],
+        [0],
+        [0],
+        [0],
+        [1],
+        [1],
+        [1],
+        [1],
+        [1],
+        [0],
+        [1],
+        [0],
+        [0],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [1],
+        [1],
+        [0],
+        [0],
+        [0],
+        [0],
+        [0],
+        [1],
+        [0],
+        [0],
+        [1],
+        [0],
+        [0],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1],
+        [1],
+        [1],
+        [1],
+        [1],
+        [0],
+        [1],
+        [0],
+        [1],
+        [0],
+        [1],
+        [1],
+        [0],
+        [1],
+        [1]], dtype=uint8))</code></pre>
+</div>
+</div>
+</section>
+<section id="data-preprocessing-part-ii" class="level2">
+<h2 class="anchored" data-anchor-id="data-preprocessing-part-ii">8. Data preprocessing (part ii)</h2>
+<p>Proses preprocessing terakhir adalah mengubah rentang nilai data (Rescaling). untuk menjelaskan proses rescaling saya gunakan contoh fitur <code>CreditScore</code>. Credit score seseorang adalah sebuah nilai kelayakan seseorang untuk memiliki kredit berdasarkan <i>credit history</i> mereka. Semakin tinggi credit score seseorang maka secara finansial mereka akan semakin dipercayai untuk memiliki kredit. Jadi, saya akan melakukan rescaling pada fitur <code>CreditScore</code> dan fitur-fitur lain sehingga memiliki rentang nilai dari 0-1 dimana 0 adalah nilai terendah dan 1 adalah nilai tertinggi</p>
+<div class="cell" data-dc="{&quot;key&quot;:&quot;52&quot;}" data-tags="[&quot;sample_code&quot;]" data-execution_count="56">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Import MinMaxScaler</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> MinMaxScaler</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Pisahkan fitur dan label ke variabel yang berbeda</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>X_train, y_train <span class="op">=</span> cc_apps_train.iloc[:, :<span class="op">-</span><span class="dv">1</span>].values, cc_apps_train.iloc[:, [<span class="op">-</span><span class="dv">1</span>]].values</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>X_test, y_test <span class="op">=</span> cc_apps_test.iloc[:, :<span class="op">-</span><span class="dv">1</span>].values, cc_apps_test.iloc[:, [<span class="op">-</span><span class="dv">1</span>]].values</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Gunakan MinMaxScaler untuk rescaling X_train dan X_test</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>scaler <span class="op">=</span> MinMaxScaler(feature_range<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">1</span>))</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>rescaledX_train <span class="op">=</span> scaler.fit_transform(X_train)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>rescaledX_test <span class="op">=</span> scaler.transform(X_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="fitting-model-logistic-regression-dengan-train-set" class="level2">
+<h2 class="anchored" data-anchor-id="fitting-model-logistic-regression-dengan-train-set">9. Fitting model logistic regression dengan train set</h2>
+<p>Pada dasarnya, memprediksi jika aplikasi kartu kredit akan diterima atau tidak termasuk dalam jenis kasus <a href="https://en.wikipedia.org/wiki/Statistical_classification">klasifikasi</a>. Menurut UCI, dataset yang saya gunakan saat ini memiliki lebih banyak aplikasi yang berstatus “Denied” daripada yang berstatus “Approved”. Dari 690 baris ada 383(55.5%) aplikasi dengan status “Denied” dan 307(44.5%) dengan status “Approved”. Model machine learning yang baik seharusnya dapat secara akurat memprediksi status aplikasi sesuai dengan statistik tersebut.</p>
+<p>Model machine learning mana yang sebaiknya kita pilih?. Karena semua kolom yang ada pada dataset ini memiliki korelasi yaitu sebagai nilai ukur layak atau tidaknya sebuah apliksi kartu kredit, saya akan memilih menggunakan <i>Logistic Regression</i> karena model tersebut biasanya memberikan hasil yang baik pada kasus serupa.</p>
+<div class="cell" data-dc="{&quot;key&quot;:&quot;59&quot;}" data-tags="[&quot;sample_code&quot;]" data-execution_count="58">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Import LogisticRegression</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Inisiasi LogisticRegression classifier dengan menggunakan nilai parameter default </span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>logreg <span class="op">=</span> LogisticRegression()</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co"># fit LogisticRegression ke train set</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>logreg.fit(rescaledX_train,y_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="58">
+<pre><code>LogisticRegression(C=1.0, class_weight=None, dual=False, fit_intercept=True,
+          intercept_scaling=1, max_iter=100, multi_class='ovr', n_jobs=1,
+          penalty='l2', random_state=None, solver='liblinear', tol=0.0001,
+          verbose=0, warm_start=False)</code></pre>
+</div>
+</div>
+</section>
+<section id="membuat-prediksi-dan-mengevaluasi-model-machine-learning" class="level2">
+<h2 class="anchored" data-anchor-id="membuat-prediksi-dan-mengevaluasi-model-machine-learning">10. Membuat prediksi dan mengevaluasi model machine learning</h2>
+<p>Selanjutnya adalah mengukur seberapa baik performa model machine learning yang telah dibuat.</p>
+<p>Saya akan mengevaluasi model ini dengan test set untuk mengukur <a href="https://developers.google.com/machine-learning/crash-course/classification/accuracy">classification accuracy</a>. Tapi sebelum itu saya juga akan melihat <a href="http://www.dataschool.io/simple-guide-to-confusion-matrix-terminology/">confusion matrix</a> dari model yang telah dibuat. Pada kasus memprediksi kelayakan aplikasi kartu kredit, penting untuk melihat apakah model yang telah dibuat telah berhasil memprediksi status “Approved” dan “Denied” yang setara dengan frekuensi label pada dataset awal. Jika hasilnya tidak sesuai dengan aspek tersebut, maka mungkin saja model yang dibuat nantinya akan memberikan status “Approved” kepada aplikasi yang seharusnya diberikan status denied. Confusion Matrix akan membantu kita untuk memperlihatkan kesesuaian aspek tersebutk.</p>
+<div class="cell" data-dc="{&quot;key&quot;:&quot;66&quot;}" data-tags="[&quot;sample_code&quot;]" data-execution_count="60">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Import confusion_matrix</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> confusion_matrix</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Gunakan logistic regression untuk memprediksi semua data pada test set dan simpan pada variable y_pred</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> logreg.predict(rescaledX_test)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Print nilai akurasi dari model logistic regression</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Accuracy of logistic regression classifier: "</span>, logreg.score(rescaledX_test,y_test))</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Print confusion matrix dari model logistic regression</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>confusion_matrix(y_test,y_pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Accuracy of logistic regression classifier:  1.0</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="60">
+<pre><code>array([[103,   0],
+       [  0, 125]])</code></pre>
+</div>
+</div>
+</section>
+<section id="grid-searching-dan-meningkatkan-performa-model-machine-learning" class="level2">
+<h2 class="anchored" data-anchor-id="grid-searching-dan-meningkatkan-performa-model-machine-learning">11. Grid searching dan meningkatkan performa model machine learning</h2>
+<p>Hasil prediksi model cukup baik, bahkan dapat mencapai nilai akurasi 100%.</p>
+<p>Pada confusion matrix, element pertama dari baris pertama confusion matrix menunjukan “true negatives” artinya jumlah aplikasi yang ditolak oleh model dan memang seharusnya ditolak. element terakhir dari baris kedua confusion matrix menunjukan “true positives” artinya jumlah aplikasi yang ditolak oleh model dan memang seharusnya ditolak.</p>
+<p>Model machine learning yang dihasilkan sangat baik, namun jika model machine learning mendapatkan performa yang tidak sesuai harapan hal yang bisa dilakukan adalah dengan melakukan grid search pada parameter model yang digunakan untuk mencari parameter yang sesuai agar model mendapatkan kemampuan prediksi yang baik.</p>
+<p>Implementasi logistic regression terdiri dari beberapa hyperparameter namun saya akan melakukan grid search pada dua hyperparameter berikut</p>
+<ul>
+<li>
+tol
+</li>
+<li>
+max_iter
+</li>
+</ul>
+<div class="cell" data-dc="{&quot;key&quot;:&quot;73&quot;}" data-tags="[&quot;sample_code&quot;]" data-execution_count="62">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Import GridSearchCV</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> GridSearchCV</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Tentukan nilai-nilai yang akan digunakan untuk tol, dan max_iter</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>tol <span class="op">=</span> [<span class="fl">0.01</span>, <span class="fl">0.001</span> ,<span class="fl">0.0001</span>]</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>max_iter <span class="op">=</span> [<span class="dv">100</span>, <span class="dv">150</span>, <span class="dv">200</span>]</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a dictionary where tol and max_iter are keys and the lists of their values are the corresponding values</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Buat dictionary dimana tol dan max_iter adalah key dan value-nya adalah list dari nilai-nilai yang telah ditentukan sebelumnya pada masing-masing key</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>param_grid <span class="op">=</span> <span class="bu">dict</span>(tol<span class="op">=</span>tol, max_iter<span class="op">=</span>max_iter)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="menentukan-model-dengan-performa-yang-paling-baik" class="level2">
+<h2 class="anchored" data-anchor-id="menentukan-model-dengan-performa-yang-paling-baik">12. Menentukan model dengan performa yang paling baik</h2>
+<p>Grid dari nilai hyperparameter telah ditentukan dan telah dibuat dalam bentuk dictionary yang mana akan digunakan <code>GridSearchCV()</code> sebagai salah satu dari parameterny. Sekarang, mulai grid search untuk melihat nilai mana yang memberikan performa terbaik.</p>
+<ul>
+<li>
+Pertama saya akan menginisiasi <code>GridSearchCV()</code> dengan model logistic regression sebelumnya dengan data yang dimiliki.
+</li>
+<li>
+Kemudia yang terakhir menyimpan skor terbaik dan nilai parameter yang digunakan
+</li>
+</ul>
+<div class="cell" data-dc="{&quot;key&quot;:&quot;80&quot;}" data-tags="[&quot;sample_code&quot;]" data-execution_count="64">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Inisiasi GridSearchCV dengan semua parameter yang diperlukan</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>grid_model <span class="op">=</span> GridSearchCV(estimator<span class="op">=</span>logreg, param_grid<span class="op">=</span>param_grid, cv<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit grid_model ke data</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>grid_model_result <span class="op">=</span> grid_model.fit(rescaledX_train, y_train)</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Tampilkan hasil</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>best_score, best_params <span class="op">=</span> grid_model_result.best_score_, grid_model_result.best_params_</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Best: </span><span class="sc">%f</span><span class="st"> using </span><span class="sc">%s</span><span class="st">"</span> <span class="op">%</span> (best_score, best_params))</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Gunakan model terbaik dan evaluasi pada test set</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>best_model <span class="op">=</span> grid_model_result.best_estimator_</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Accuracy of logistic regression classifier: "</span>, best_model.score(rescaledX_test,y_test))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Best: 1.000000 using {'max_iter': 100, 'tol': 0.01}
+Accuracy of logistic regression classifier:  1.0</code></pre>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
