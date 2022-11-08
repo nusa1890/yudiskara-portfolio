@@ -8,7 +8,7 @@ description: A minimal example of using markdown with fastpages.
 layout: post
 title: An Example Markdown Post
 toc: true
-image: chart-preview.png
+image: images/chart-preview.png
 ---
 
 # Example Markdown Post
