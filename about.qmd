@@ -1,0 +1,19 @@
+---
+title: "About"
+image: profile1.jpg
+about:
+  template: jolla
+  links:
+    - icon: twitter
+      text: Twitter
+      href: https://twitter.com/NusaYudiskara
+    - icon: linkedin
+      text: LinkedIn
+      href: https://www.linkedin.com/in/nusa-yudiskara-7a2596126/
+    - icon: github
+      text: Github
+      href: https://github.com/nusa1890
+
+---
+
+About this blog

@@ -1,0 +1,19 @@
+project:
+  type: website
+
+website:
+  title: "I Made Nusa Yudiskara"
+  navbar:
+    right:
+      - about.qmd
+      - icon: github
+        href: https://github.com/nusa1890
+      - icon: twitter
+        href: https://twitter.com/NusaYudiskara
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+
+
+

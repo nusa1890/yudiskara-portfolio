@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.251">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2022-11-05">
+<meta name="description" content="Exploratory data analysis untuk mengetahui efektivitas upaya pemulihan hutang bank dengan menggunakan scipy.">
+
+<title>I Made Nusa Yudiskara - EDA Pada Kasus Pemulihan Hutang Bank</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">I Made Nusa Yudiskara</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html">About</a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/nusa1890"><i class="bi bi-github" role="img">
+</i> 
+ </a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/NusaYudiskara"><i class="bi bi-twitter" role="img">
+</i> 
+ </a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">EDA Pada Kasus Pemulihan Hutang Bank</h1>
+                  <div>
+        <div class="description">
+          Exploratory data analysis untuk mengetahui efektivitas upaya pemulihan hutang bank dengan menggunakan <code>scipy</code>.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">jupyter</div>
+                <div class="quarto-category">code</div>
+                <div class="quarto-category">analysis</div>
+                <div class="quarto-category">EDA</div>
+                <div class="quarto-category">linear regression</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">November 5, 2022</p>
+      </div>
+    </div>
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="regression-discontinuity-banking-recovery" class="level2">
+<h2 class="anchored" data-anchor-id="regression-discontinuity-banking-recovery">1. Regression discontinuity: banking recovery</h2>
+<p>
+Setelah suatu utang dinyatakan secara hukum “tidak dapat ditagih” oleh bank, rekening tersebut dianggap “hilang”. Tapi itu tidak berarti bank <strong><em>melupakan</em></strong> utang tersebut. Mereka masih ingin mengumpulkan sebagian dari uang yang mereka miliki. Bank akan menilai akun untuk mengevaluasi “Expected Recovery Amount”, yaitu jumlah uang yang diharapkan yang mungkin dapat diterima bank dari pelanggan di masa depan. Jumlah ini merupakan fungsi dari probabilitas pelanggan membayar, total hutang, dan faktor lain yang mempengaruhi kemampuan dan kemauan pelanggan membayar.
+</p>
+<p>
+Bank telah menerapkan strategi pemulihan yang berbeda pada ambang batas yang berbeda ($1000, $2000, dll.) di mana semakin besar jumlah pemulihan yang diharapkan, semakin banyak upaya yang dilakukan bank untuk menghubungi pelanggan. Untuk jumlah pemulihan yang rendah (Level 0), bank hanya menambahkan informasi kontak pelanggan ke dialer otomatis dan sistem email mereka. Untuk strategi pemulihan yang lebih tinggi, bank mengeluarkan lebih banyak biaya karena mereka memanfaatkan sumber daya manusia dalam lebih banyak upaya untuk mendapatkan pembayaran. Setiap level tambahan dari strategi pemulihan memerlukan tambahan $50 per pelanggan sehingga pelanggan di Strategi Pemulihan Level 1 membebani perusahaan $50 lebih banyak daripada pelanggan di Level 0. Pelanggan di Level 2 berharga $50 lebih mahal daripada pelanggan di Level 1, dst.
+</p>
+<p>
+<strong>Pertanyaan besar</strong>: apakah jumlah ekstra yang diperoleh pada level yang lebih tinggi dari biaya $50 yang dikeluarkan? Dengan kata lain, apakah ada lompatan (juga disebut “discontinuity”) lebih dari $50 dalam jumlah yang dipulihkan pada tingkat level strategi yang lebih tinggi? Saya akan mencoba menjawab pertanyaan tersebut disini.
+</p>
+<p>
+Pertama, kita akan memuat dataset perbankan dan melihat beberapa baris data pertama. Untuk memahami kumpulan data itu sendiri dan mulai memikirkan cara menganalisis data.
+</p>
+<div class="cell" data-dc="{&quot;key&quot;:&quot;4&quot;}" data-tags="[&quot;sample_code&quot;]" data-trusted="true" data-execution_count="194">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Import modules</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># load dataset ke pandas dataframe</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">"datasets/bank_data.csv"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Tampilkan 5 baris pertama dataframe</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="194">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>id</th>
+      <th>expected_recovery_amount</th>
+      <th>actual_recovery_amount</th>
+      <th>recovery_strategy</th>
+      <th>age</th>
+      <th>sex</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2030</td>
+      <td>194</td>
+      <td>263.540</td>
+      <td>Level 0 Recovery</td>
+      <td>19</td>
+      <td>Male</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1150</td>
+      <td>486</td>
+      <td>416.090</td>
+      <td>Level 0 Recovery</td>
+      <td>25</td>
+      <td>Female</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>380</td>
+      <td>527</td>
+      <td>429.350</td>
+      <td>Level 0 Recovery</td>
+      <td>27</td>
+      <td>Male</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1838</td>
+      <td>536</td>
+      <td>296.990</td>
+      <td>Level 0 Recovery</td>
+      <td>25</td>
+      <td>Male</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1995</td>
+      <td>541</td>
+      <td>346.385</td>
+      <td>Level 0 Recovery</td>
+      <td>34</td>
+      <td>Male</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="graphical-exploratory-data-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="graphical-exploratory-data-analysis">2. Graphical exploratory data analysis</h2>
+<p>
+Bank telah menerapkan strategi pemulihan yang berbeda pada ambang batas yang berbeda ($1000, $2000, $3000 dan $5000) di mana semakin besar Jumlah Pemulihan yang Diharapkan, semakin banyak upaya yang dilakukan bank untuk menghubungi pelanggan. Menekankan pada transisi pertama (antara Level 0 dan Level 1) berarti kita berfokus pada populasi dengan “Expected Recovery Amounts” yang Diharapkan antara $0 dan $2000 di mana transisi artar Level terjadi pada $1000. Pelanggan di Level 1 (“Expected Recovery Amounts” antara $1001 dan $2000) menerima lebih banyak perhatian dari bank dan, menurut definisi, mereka memiliki Jumlah Pemulihan yang Diharapkan lebih tinggi daripada pelanggan di Level 0 (antara $1 dan $1000) .
+</p>
+<p>
+Berikut ini ringkasan singkat tentang Level dan ambang batas lagi:
+</p>
+<ul>
+<li>
+Level 0: Jumlah pemulihan yang diharapkan &gt;$0 dan &lt;=$1000
+</li>
+<li>
+Level 1: Jumlah pemulihan yang diharapkan &gt;$1000 dan &lt;=$2000
+</li>
+<li>
+Threshold $1000 memisahkan Level 0 dari Level 1
+</li>
+</ul>
+<p>
+Pertanyaan kuncinya adalah apakah ada faktor lain selain Jumlah Pemulihan yang Diharapkan yang juga bervariasi secara sistematis di ambang $1000. Misalnya, apakah usia pelanggan menunjukkan lompatan (diskontinuitas) pada ambang $1000 atau apakah usia itu bervariasi? Kita dapat memeriksa ini dengan terlebih dahulu membuat scatter plot usia sebagai fungsi dari “Expected Recovery Amounts” untuk rentang kecil “Expected Recovery Amounts”, $0 hingga $2000. Rentang ini mencakup Level 0 dan 1.
+</p>
+<div class="cell" data-dc="{&quot;key&quot;:&quot;11&quot;}" data-tags="[&quot;sample_code&quot;]" data-trusted="true" data-execution_count="196">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Scatter plot Age vs. Expected Recovery Amount</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>matplotlib inline</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>plt.scatter(x<span class="op">=</span>df[<span class="st">'expected_recovery_amount'</span>], y<span class="op">=</span>df[<span class="st">'age'</span>], c<span class="op">=</span><span class="st">"g"</span>, s<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>plt.xlim(<span class="dv">0</span>, <span class="dv">2000</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>plt.ylim(<span class="dv">0</span>, <span class="dv">60</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>plt.xlabel( <span class="st">"Expected Recovery Amount"</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Age"</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="196">
+<pre><code>&lt;matplotlib.legend.Legend at 0x7f873c306f28&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/usr/local/lib/python3.6/dist-packages/matplotlib/figure.py:2267: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+  warnings.warn("This figure includes Axes that are not compatible "</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="2022-11-05-EDA-Pada-Kasus-Pemulihan-Hutang-Bank_files/figure-html/cell-3-output-3.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="statistical-test-age-vs.-expected-recovery-amount" class="level2">
+<h2 class="anchored" data-anchor-id="statistical-test-age-vs.-expected-recovery-amount">3. Statistical test: age vs.&nbsp;expected recovery amount</h2>
+<p>
+Kita ingin memastikan bahwa variabel seperti usia dan jenis kelamin serupa di atas ataupun di bawah threshold $1000 “Expected Recovery Amount”. Ini penting karena kita ingin dapat menyimpulkan bahwa perbedaan “Expected Recovery Amount” dan jumlah pemulihan sebenarnya (Actual Recovery Amount) disebabkan oleh Strategi Pemulihan yang lebih tinggi dan bukan karena perbedaan lain seperti usia atau jenis kelamin.
+</p>
+<p>
+Plot sebar usia dan “Expected Recovery Amount” tidak menunjukkan lompatan yang jelas sekitar $1000. Selanjutnya akan dilakukan analisis statistik yang memeriksa usia rata-rata pelanggan yang berada hampir tepat di atas dan di bawah ambang batas. Kita bisa mulai dengan memeriksa kisaran dari $900 hingga $1100.
+</p>
+<p>
+Untuk menentukan apakah ada perbedaan usia tepat di atas dan di bawah ambang batas, akan digunakan uji Kruskal-Wallis, uji statistik yang tidak membuat asumsi distribusi.
+</p>
+<div class="cell" data-dc="{&quot;key&quot;:&quot;18&quot;}" data-tags="[&quot;sample_code&quot;]" data-trusted="true" data-execution_count="198">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Import stats module dari library scipy</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy <span class="im">import</span> stats</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute average age just below and above the threshold</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Hitung rata-rata usia pelanggan yang berada disekitar bagian atas dan bagian bawah threshold</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>era_900_1100 <span class="op">=</span> df.loc[(df[<span class="st">'expected_recovery_amount'</span>]<span class="op">&lt;</span><span class="dv">1100</span>) <span class="op">&amp;</span> </span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>                      (df[<span class="st">'expected_recovery_amount'</span>]<span class="op">&gt;=</span><span class="dv">900</span>)]</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>by_recovery_strategy <span class="op">=</span> era_900_1100.groupby([<span class="st">'recovery_strategy'</span>])</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>by_recovery_strategy[<span class="st">'age'</span>].describe().unstack()</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Lakukan Kruskal-Wallis test </span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>Level_0_age <span class="op">=</span> era_900_1100.loc[df[<span class="st">'recovery_strategy'</span>]<span class="op">==</span><span class="st">"Level 0 Recovery"</span>][<span class="st">'age'</span>]</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>Level_1_age <span class="op">=</span> era_900_1100.loc[df[<span class="st">'recovery_strategy'</span>]<span class="op">==</span><span class="st">"Level 1 Recovery"</span>][<span class="st">'age'</span>]</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>stats.kruskal(Level_0_age, Level_1_age) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="198">
+<pre><code>KruskalResult(statistic=3.4572342749517513, pvalue=0.06297556896097407)</code></pre>
+</div>
+</div>
+</section>
+<section id="statistical-test-sex-vs.-expected-recovery-amount" class="level2">
+<h2 class="anchored" data-anchor-id="statistical-test-sex-vs.-expected-recovery-amount">4. Statistical test: sex vs.&nbsp;expected recovery amount</h2>
+<p>
+Terlihat bahwa tidak ada lompatan besar dalam rata-rata usia pelanggan yang berada disekitar threshold $1000 bagian atas dan bawah dengan melakukan uji statistik serta memeriksa secara grafis dengan scatter plot.
+</p>
+<p>
+Kita juga sebaiknya menguji bahwa persentase pelanggan laki-laki tidak melampaui ambang $1000. Kita bisa mulai dengan menjelajahi kisaran $900 hingga $1100 dan kemudian menyesuaikan kisaran ini.
+</p>
+<p>
+Kita dapat memeriksa pertanyaan ini secara statistik dengan mengembangkan cross-tabs serta melakukan chi-square tests dari persentase pelanggan yang laki-laki dan perempuan.
+</p>
+<div class="cell" data-dc="{&quot;key&quot;:&quot;26&quot;}" data-tags="[&quot;sample_code&quot;]" data-trusted="true" data-execution_count="200">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Jumlah pelanggan pada setiap kategori</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>crosstab <span class="op">=</span> pd.crosstab(df.loc[(df[<span class="st">'expected_recovery_amount'</span>]<span class="op">&lt;</span><span class="dv">1100</span>) <span class="op">&amp;</span> </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                              (df[<span class="st">'expected_recovery_amount'</span>]<span class="op">&gt;=</span><span class="dv">900</span>)][<span class="st">'recovery_strategy'</span>], </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                       df[<span class="st">'sex'</span>])</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(crosstab)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Chi-square test</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>chi2_stat, p_val, dof, ex <span class="op">=</span> stats.chi2_contingency(crosstab)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(p_val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>sex                Female  Male
+recovery_strategy              
+Level 0 Recovery       32    57
+Level 1 Recovery       39    55
+0.5377947810444592</code></pre>
+</div>
+</div>
+</section>
+<section id="exploratory-graphical-analysis-recovery-amount" class="level2">
+<h2 class="anchored" data-anchor-id="exploratory-graphical-analysis-recovery-amount">5. Exploratory graphical analysis: recovery amount</h2>
+<p>
+Sekarang kita sudah cukup yakin bahwa pelanggan yang berada tepat di atas dan di bawah threshold $1000, rata-rata, memiliki usia rata-rata dan persentase laki-laki.
+</p>
+<p>
+Sekarang saatnya untuk fokus pada tujuan utama, jumlah pemulihan yang sebenarnya (Actual Recovery Amount).
+</p>
+<p>
+Langkah pertama dalam memeriksa hubungan antara Actual Recovery Amount dan Expected Recovery Amount adalah membuat scatter plot di mana kita ingin memfokuskan perhatian kita pada kisaran threshold bawah dan atas. Secara khusus, akan dibuat scatter plot Jumlah Expected Recovery Amount (X) dan Actual Recovery Amount (Y) untuk Actual Recovery Amount diantara $900 hingga $1100. Rentang ini mencakup Level 0 dan 1. Pertanyaan kuncinya adalah apakah kita melihat diskontinuitas (lompatan) di sekitar ambang $1000.
+</p>
+<div class="cell" data-dc="{&quot;key&quot;:&quot;33&quot;}" data-tags="[&quot;sample_code&quot;]" data-trusted="true" data-execution_count="202">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Scatter plot of Actual Recovery Amount vs. Expected Recovery Amount </span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>plt.scatter(x<span class="op">=</span>df[<span class="st">'expected_recovery_amount'</span>], y<span class="op">=</span>df[<span class="st">'actual_recovery_amount'</span>], c<span class="op">=</span><span class="st">"g"</span>, s<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>plt.xlim(<span class="dv">900</span>, <span class="dv">1100</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>plt.ylim(<span class="dv">0</span>, <span class="dv">2000</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Expected Recovery Amount"</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Actual Recovery Amount"</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>plt.show</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="202">
+<pre><code>&lt;function matplotlib.pyplot.show(*args, **kw)&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/usr/local/lib/python3.6/dist-packages/matplotlib/figure.py:2267: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+  warnings.warn("This figure includes Axes that are not compatible "</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="2022-11-05-EDA-Pada-Kasus-Pemulihan-Hutang-Bank_files/figure-html/cell-6-output-3.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="statistical-analysis-recovery-amount" class="level2">
+<h2 class="anchored" data-anchor-id="statistical-analysis-recovery-amount">6. Statistical analysis: recovery amount</h2>
+<p>
+Seperti yang telah dilakukan dengan variable usia, kita juga dapat melakukan uji statistik untuk melihat apakah jumlah pemulihan yang sebenarnya memiliki diskontinuitas di atas ambang $1000. Ini akan dilakukan untuk dua rentang berbeda dari jumlah pemulihan yang diharapkan $900 hingga $1100 dan untuk kisaran sempit $950 hingga $1050 untuk melihat apakah hasilnya konsisten.
+</p>
+<p>
+Sekali lagi, kita akan menggunakan tes Kruskal-Wallis.
+</p>
+<p>
+Pertama-tama, akan dihitung jumlah pemulihan aktual rata-rata untuk pelanggan tersebut tepat di bawah dan tepat di atas threshold menggunakan kisaran dari $900 hingga $1100. Kemudian akan dilakukan uji Kruskal-Wallis untuk melihat apakah jumlah pemulihan sebenarnya berbeda tepat di atas dan di bawah threshold. Setelah itu, langkah-langkah ini akan diulangi untuk rentang yang lebih kecil dari $950 hingga $1050.
+</p>
+<div class="cell" data-dc="{&quot;key&quot;:&quot;40&quot;}" data-tags="[&quot;sample_code&quot;]" data-trusted="true" data-execution_count="204">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Hitung rata-rata actual recovery amount yang ada diatas dan dibawah threshold</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>by_recovery_strategy[<span class="st">'actual_recovery_amount'</span>].describe().unstack()</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Lakukan Kruskal-Wallis test</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>Level_0_actual <span class="op">=</span> era_900_1100.loc[df[<span class="st">'recovery_strategy'</span>]<span class="op">==</span><span class="st">'Level 0 Recovery'</span>][<span class="st">'actual_recovery_amount'</span>]</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>Level_1_actual <span class="op">=</span> era_900_1100.loc[df[<span class="st">'recovery_strategy'</span>]<span class="op">==</span><span class="st">'Level 1 Recovery'</span>][<span class="st">'actual_recovery_amount'</span>]</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>stats.kruskal(Level_0_actual,Level_1_actual) </span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Ulangi untuk rentang yang lebil kecil $950 - $1050</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>era_950_1050 <span class="op">=</span> df.loc[(df[<span class="st">'expected_recovery_amount'</span>]<span class="op">&lt;</span><span class="dv">1050</span>) <span class="op">&amp;</span> </span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>                      (df[<span class="st">'expected_recovery_amount'</span>]<span class="op">&gt;=</span><span class="dv">950</span>)]</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>Level_0_actual <span class="op">=</span> era_950_1050.loc[df[<span class="st">'recovery_strategy'</span>]<span class="op">==</span><span class="st">'Level 0 Recovery'</span>][<span class="st">'actual_recovery_amount'</span>]</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>Level_1_actual <span class="op">=</span> era_950_1050.loc[df[<span class="st">'recovery_strategy'</span>]<span class="op">==</span><span class="st">'Level 1 Recovery'</span>][<span class="st">'actual_recovery_amount'</span>]</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>stats.kruskal(Level_0_actual,Level_1_actual)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="204">
+<pre><code>KruskalResult(statistic=30.246000000000038, pvalue=3.80575314300276e-08)</code></pre>
+</div>
+</div>
+</section>
+<section id="regression-modeling-no-threshold" class="level2">
+<h2 class="anchored" data-anchor-id="regression-modeling-no-threshold">7. Regression modeling: no threshold</h2>
+<p>
+Kita sekarang ingin mengambil pendekatan berbasis regresi untuk memperkirakan dampak program pada threshold $1000 menggunakan data yang berada tepat di atas dan di bawah threshold.
+</p>
+<p>
+Kita akan membuat dua model. Model pertama tidak memiliki threshold, sedangkan model kedua akan menyertakan threshold.
+</p>
+<p>
+Model pertama memprediksi actual recovery amount (variabel dependen) sebagai fungsi dari expected recovery amount (variabel independen). Diharapkan akan ada hubungan positif yang kuat antara kedua variabel ini.
+</p>
+<p>
+Kita akan memeriksa penyesuaian R-kuadrat untuk melihat persentase varians yang dijelaskan oleh model. Dalam model ini, kita tidak memperlihatkan threshold tetapi hanya melihat bagaimana variabel yang digunakan untuk menetapkan pelanggan (expected recovery amount) berhubungan dengan variabel hasil (actual recovery amount).
+</p>
+<div class="cell" data-dc="{&quot;key&quot;:&quot;48&quot;}" data-tags="[&quot;sample_code&quot;]" data-trusted="true" data-execution_count="206">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Import statsmodels</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Tentukan nilai X dan y</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> era_900_1100[<span class="st">'expected_recovery_amount'</span>]</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> era_900_1100[<span class="st">'actual_recovery_amount'</span>]</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> sm.add_constant(X)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Buat model linear regression</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> sm.OLS(y, X).fit()</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> model.predict(X)</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>model.summary()</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Tampilkan rangkuman statistik model</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="206">
+
+<table class="simpletable">
+<caption>OLS Regression Results</caption>
+<tbody><tr>
+  <th>Dep. Variable:</th>    <td>actual_recovery_amount</td> <th>  R-squared:         </th> <td>   0.261</td>
+</tr>
+<tr>
+  <th>Model:</th>                      <td>OLS</td>          <th>  Adj. R-squared:    </th> <td>   0.256</td>
+</tr>
+<tr>
+  <th>Method:</th>                <td>Least Squares</td>     <th>  F-statistic:       </th> <td>   63.78</td>
+</tr>
+<tr>
+  <th>Date:</th>                <td>Sun, 06 Nov 2022</td>    <th>  Prob (F-statistic):</th> <td>1.56e-13</td>
+</tr>
+<tr>
+  <th>Time:</th>                    <td>05:42:26</td>        <th>  Log-Likelihood:    </th> <td> -1278.9</td>
+</tr>
+<tr>
+  <th>No. Observations:</th>         <td>   183</td>         <th>  AIC:               </th> <td>   2562.</td>
+</tr>
+<tr>
+  <th>Df Residuals:</th>             <td>   181</td>         <th>  BIC:               </th> <td>   2568.</td>
+</tr>
+<tr>
+  <th>Df Model:</th>                 <td>     1</td>         <th>                     </th>     <td> </td>   
+</tr>
+<tr>
+  <th>Covariance Type:</th>         <td>nonrobust</td>       <th>                     </th>     <td> </td>   
+</tr>
+</tbody></table>
+<table class="simpletable">
+<tbody><tr>
+              <td></td>                <th>coef</th>     <th>std err</th>      <th>t</th>      <th>P&gt;|t|</th>  <th>[0.025</th>    <th>0.975]</th>  
+</tr>
+<tr>
+  <th>const</th>                    <td>-1978.7597</td> <td>  347.741</td> <td>   -5.690</td> <td> 0.000</td> <td>-2664.907</td> <td>-1292.612</td>
+</tr>
+<tr>
+  <th>expected_recovery_amount</th> <td>    2.7577</td> <td>    0.345</td> <td>    7.986</td> <td> 0.000</td> <td>    2.076</td> <td>    3.439</td>
+</tr>
+</tbody></table>
+<table class="simpletable">
+<tbody><tr>
+  <th>Omnibus:</th>       <td>64.493</td> <th>  Durbin-Watson:     </th> <td>   1.777</td>
+</tr>
+<tr>
+  <th>Prob(Omnibus):</th> <td> 0.000</td> <th>  Jarque-Bera (JB):  </th> <td> 185.818</td>
+</tr>
+<tr>
+  <th>Skew:</th>          <td> 1.463</td> <th>  Prob(JB):          </th> <td>4.47e-41</td>
+</tr>
+<tr>
+  <th>Kurtosis:</th>      <td> 6.977</td> <th>  Cond. No.          </th> <td>1.80e+04</td>
+</tr>
+</tbody></table><br><br>Warnings:<br>[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.<br>[2] The condition number is large, 1.8e+04. This might indicate that there are<br>strong multicollinearity or other numerical problems.
+</div>
+</div>
+</section>
+<section id="regression-modeling-adding-true-threshold" class="level2">
+<h2 class="anchored" data-anchor-id="regression-modeling-adding-true-threshold">8. Regression modeling: adding true threshold</h2>
+<p>
+Dari model pertama, kita melihat bahwa koefisien regresi dari “expected recovery amount” signifikan secara statistik.
+</p>
+<p>
+Model kedua menambahkan indikator threshold ke model (dalam hal ini di $1000).
+</p>
+<p>
+Kita akan membuat variabel indikator (baik 0 atau 1) yang menunjukkan apakah jumlah pemulihan yang diharapkan lebih besar dari $1000 atau tidak. Ketika kita menambahkan threshold yang sebenarnya ke model, koefisien regresi untuk threshold yang sebenarnya mewakili jumlah tambahan yang dipulihkan karena strategi pemulihan yang lebih tinggi. Artinya, koefisien regresi untuk threshold sebenarnya mengukur ukuran diskontinuitas untuk pelanggan tepat di atas dan tepat di bawah ambang batas.
+</p>
+<p>
+Jika strategi pemulihan yang lebih tinggi membantu memulihkan lebih banyak uang, maka koefisien regresi dari ambang batas yang sebenarnya akan lebih besar dari nol. Jika strategi pemulihan yang lebih tinggi tidak membantu memulihkan lebih banyak uang, maka koefisien regresi tidak akan signifikan secara statistik.
+</p>
+<div class="cell" data-dc="{&quot;key&quot;:&quot;55&quot;}" data-tags="[&quot;sample_code&quot;]" data-trusted="true" data-execution_count="208">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create indicator (0 or 1) for expected recovery amount &gt;= $1000</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Buat indikator (0 atau 1) untuk expected recovery amount &gt;= $1000</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'indicator_1000'</span>] <span class="op">=</span> np.where(df[<span class="st">'expected_recovery_amount'</span>]<span class="op">&lt;</span><span class="dv">1000</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>era_900_1100 <span class="op">=</span> df.loc[(df[<span class="st">'expected_recovery_amount'</span>]<span class="op">&lt;</span><span class="dv">1100</span>) <span class="op">&amp;</span> </span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>                      (df[<span class="st">'expected_recovery_amount'</span>]<span class="op">&gt;=</span><span class="dv">900</span>)]</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Tentukan X and y</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> era_900_1100[[<span class="st">'expected_recovery_amount'</span>,<span class="st">'indicator_1000'</span>]]</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> era_900_1100[<span class="st">'actual_recovery_amount'</span>]</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> sm.add_constant(X)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Buat model linear regression </span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> sm.OLS(y,X).fit()</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Tampilkan rangkuman statistik model</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>model.summary()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="208">
+
+<table class="simpletable">
+<caption>OLS Regression Results</caption>
+<tbody><tr>
+  <th>Dep. Variable:</th>    <td>actual_recovery_amount</td> <th>  R-squared:         </th> <td>   0.314</td>
+</tr>
+<tr>
+  <th>Model:</th>                      <td>OLS</td>          <th>  Adj. R-squared:    </th> <td>   0.307</td>
+</tr>
+<tr>
+  <th>Method:</th>                <td>Least Squares</td>     <th>  F-statistic:       </th> <td>   41.22</td>
+</tr>
+<tr>
+  <th>Date:</th>                <td>Sun, 06 Nov 2022</td>    <th>  Prob (F-statistic):</th> <td>1.83e-15</td>
+</tr>
+<tr>
+  <th>Time:</th>                    <td>05:42:26</td>        <th>  Log-Likelihood:    </th> <td> -1272.0</td>
+</tr>
+<tr>
+  <th>No. Observations:</th>         <td>   183</td>         <th>  AIC:               </th> <td>   2550.</td>
+</tr>
+<tr>
+  <th>Df Residuals:</th>             <td>   180</td>         <th>  BIC:               </th> <td>   2560.</td>
+</tr>
+<tr>
+  <th>Df Model:</th>                 <td>     2</td>         <th>                     </th>     <td> </td>   
+</tr>
+<tr>
+  <th>Covariance Type:</th>         <td>nonrobust</td>       <th>                     </th>     <td> </td>   
+</tr>
+</tbody></table>
+<table class="simpletable">
+<tbody><tr>
+              <td></td>                <th>coef</th>     <th>std err</th>      <th>t</th>      <th>P&gt;|t|</th>  <th>[0.025</th>    <th>0.975]</th>  
+</tr>
+<tr>
+  <th>const</th>                    <td>    3.3440</td> <td>  626.274</td> <td>    0.005</td> <td> 0.996</td> <td>-1232.440</td> <td> 1239.128</td>
+</tr>
+<tr>
+  <th>expected_recovery_amount</th> <td>    0.6430</td> <td>    0.655</td> <td>    0.981</td> <td> 0.328</td> <td>   -0.650</td> <td>    1.936</td>
+</tr>
+<tr>
+  <th>indicator_1000</th>           <td>  277.6344</td> <td>   74.043</td> <td>    3.750</td> <td> 0.000</td> <td>  131.530</td> <td>  423.739</td>
+</tr>
+</tbody></table>
+<table class="simpletable">
+<tbody><tr>
+  <th>Omnibus:</th>       <td>65.977</td> <th>  Durbin-Watson:     </th> <td>   1.906</td>
+</tr>
+<tr>
+  <th>Prob(Omnibus):</th> <td> 0.000</td> <th>  Jarque-Bera (JB):  </th> <td> 186.537</td>
+</tr>
+<tr>
+  <th>Skew:</th>          <td> 1.510</td> <th>  Prob(JB):          </th> <td>3.12e-41</td>
+</tr>
+<tr>
+  <th>Kurtosis:</th>      <td> 6.917</td> <th>  Cond. No.          </th> <td>3.37e+04</td>
+</tr>
+</tbody></table><br><br>Warnings:<br>[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.<br>[2] The condition number is large, 3.37e+04. This might indicate that there are<br>strong multicollinearity or other numerical problems.
+</div>
+</div>
+</section>
+<section id="regression-modeling-adjusting-the-window" class="level2">
+<h2 class="anchored" data-anchor-id="regression-modeling-adjusting-the-window">9. Regression modeling: adjusting the window</h2>
+<p>
+Koefisien regresi untuk threshold sebenarnya signifikan secara statistik dengan perkiraan dampak sekitar $278. Ini jauh lebih besar daripada $50 per pelanggan yang dibutuhkan untuk menjalankan strategi pemulihan yang lebih tinggi ini.
+</p>
+<p>
+Untuk menambahkan keyakinan bahwa hasil ini bukan karena memilih rentang expected recovery amount dari $900 hingga $1100. Analisis ini untuk rentang dari $950 hingga $1050 untuk melihat apakah kita mendapatkan hasil yang serupa.
+</p>
+<p>
+Jawabannya? Dengan menggunakan rentang lebar ($900 hingga $1100) atau lebih sempit ($950 hingga $1050), jumlah pemulihan tambahan pada strategi pemulihan yang lebih tinggi jauh lebih besar daripada $50 per pelanggan yang dikeluarkan untuk strategi pemulihan yang lebih tinggi. Jadi kami menyimpulkan bahwa strategi pemulihan yang lebih tinggi sebanding dengan biaya tambahan $50 per pelanggan.
+</p>
+<div class="cell" data-dc="{&quot;key&quot;:&quot;62&quot;}" data-tags="[&quot;sample_code&quot;]" data-trusted="true" data-execution_count="210">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>era_950_1050 <span class="op">=</span> df.loc[(df[<span class="st">'expected_recovery_amount'</span>]<span class="op">&lt;</span><span class="dv">1050</span>) <span class="op">&amp;</span> </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>                      (df[<span class="st">'expected_recovery_amount'</span>]<span class="op">&gt;=</span><span class="dv">950</span> )]</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Tentukan X dan y </span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> era_950_1050[[<span class="st">'expected_recovery_amount'</span>,<span class="st">'indicator_1000'</span>]]</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> era_950_1050[<span class="st">'actual_recovery_amount'</span>]</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> sm.add_constant(X)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Buat model linear regression </span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> sm.OLS(y,X).fit()</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Tampilkan rangkuman statistik model</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>model.summary()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="210">
+
+<table class="simpletable">
+<caption>OLS Regression Results</caption>
+<tbody><tr>
+  <th>Dep. Variable:</th>    <td>actual_recovery_amount</td> <th>  R-squared:         </th> <td>   0.283</td>
+</tr>
+<tr>
+  <th>Model:</th>                      <td>OLS</td>          <th>  Adj. R-squared:    </th> <td>   0.269</td>
+</tr>
+<tr>
+  <th>Method:</th>                <td>Least Squares</td>     <th>  F-statistic:       </th> <td>   18.99</td>
+</tr>
+<tr>
+  <th>Date:</th>                <td>Sun, 06 Nov 2022</td>    <th>  Prob (F-statistic):</th> <td>1.12e-07</td>
+</tr>
+<tr>
+  <th>Time:</th>                    <td>05:42:26</td>        <th>  Log-Likelihood:    </th> <td> -692.92</td>
+</tr>
+<tr>
+  <th>No. Observations:</th>         <td>    99</td>         <th>  AIC:               </th> <td>   1392.</td>
+</tr>
+<tr>
+  <th>Df Residuals:</th>             <td>    96</td>         <th>  BIC:               </th> <td>   1400.</td>
+</tr>
+<tr>
+  <th>Df Model:</th>                 <td>     2</td>         <th>                     </th>     <td> </td>   
+</tr>
+<tr>
+  <th>Covariance Type:</th>         <td>nonrobust</td>       <th>                     </th>     <td> </td>   
+</tr>
+</tbody></table>
+<table class="simpletable">
+<tbody><tr>
+              <td></td>                <th>coef</th>     <th>std err</th>      <th>t</th>      <th>P&gt;|t|</th>  <th>[0.025</th>    <th>0.975]</th>  
+</tr>
+<tr>
+  <th>const</th>                    <td> -279.5243</td> <td> 1840.707</td> <td>   -0.152</td> <td> 0.880</td> <td>-3933.298</td> <td> 3374.250</td>
+</tr>
+<tr>
+  <th>expected_recovery_amount</th> <td>    0.9189</td> <td>    1.886</td> <td>    0.487</td> <td> 0.627</td> <td>   -2.825</td> <td>    4.663</td>
+</tr>
+<tr>
+  <th>indicator_1000</th>           <td>  286.5337</td> <td>  111.352</td> <td>    2.573</td> <td> 0.012</td> <td>   65.502</td> <td>  507.566</td>
+</tr>
+</tbody></table>
+<table class="simpletable">
+<tbody><tr>
+  <th>Omnibus:</th>       <td>39.302</td> <th>  Durbin-Watson:     </th> <td>   1.955</td>
+</tr>
+<tr>
+  <th>Prob(Omnibus):</th> <td> 0.000</td> <th>  Jarque-Bera (JB):  </th> <td>  82.258</td>
+</tr>
+<tr>
+  <th>Skew:</th>          <td> 1.564</td> <th>  Prob(JB):          </th> <td>1.37e-18</td>
+</tr>
+<tr>
+  <th>Kurtosis:</th>      <td> 6.186</td> <th>  Cond. No.          </th> <td>6.81e+04</td>
+</tr>
+</tbody></table><br><br>Warnings:<br>[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.<br>[2] The condition number is large, 6.81e+04. This might indicate that there are<br>strong multicollinearity or other numerical problems.
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
